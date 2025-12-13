@@ -1,0 +1,137 @@
+from dataset import ChestXRayDataset, create_split, extract_list, CLASSES
+from utils import get_pos_weights
+from model import ResNet50
+from preprocess import train_transform, test_transform
+from eval import validate
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
+from torch.nn import BCEWithLogitsLoss
+from torch.utils.data import DataLoader
+import torch
+import os
+import argparse
+
+
+#Data paths
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--data_root",
+    type = str,
+    required = True,
+    help = "Path to ChestXRay dataset folder"
+)
+args = parser.parse_args()
+
+root_dir = args.data_root #getting main folder path by CLI 
+csv_name = "Data_Entry_2017_v2020.csv"
+train_val_list_name = "train_val_list.txt"
+test_list_name = "test_list.txt"
+
+#Extracting idxs lists
+train_val_list = extract_list(os.path.join(root_dir, train_val_list_name))
+test_list = extract_list(os.path.join(root_dir, test_list_name))
+
+#Importing the datasets
+train_list, val_list = create_split(train_val_list, val_size = 0.2)
+
+#Building datasets and dataloaders
+train_data = ChestXRayDataset(
+    img_dir = os.path.join(root_dir, "images"),
+    csv_path = os.path.join(root_dir, csv_name),
+    list_index = train_list,
+    transform = train_transform()
+)
+
+val_data = ChestXRayDataset(
+    img_dir = os.path.join(root_dir, "images"),
+    csv_path = os.path.join(root_dir, csv_name),
+    list_index = val_list,
+    transform = test_transform() 
+)
+
+test_data = ChestXRayDataset(
+    img_dir = os.path.join(root_dir, "images"),
+    csv_path = os.path.join(root_dir, csv_name),
+    list_index = test_list,
+    transform = test_transform()
+)
+
+train_dl = DataLoader(train_data, batch_size = 64, shuffle = True)
+val_dl = DataLoader(val_data, batch_size = 64, shuffle = False)
+test_dl = DataLoader(test_data, batch_size = 64, shuffle = False)
+
+#creating model, optimizer, scheduler and defining loss
+model = ResNet50(num_classes = 14)
+optimizer = AdamW([
+    {"params": model.classifier.parameters(), "lr": 1e-3}, #higher lr for head classifier
+    {"params": model.backbone.layer4.parameters(), "lr": 1e-4} #lower lr for last convolutional block (fine-tuning)
+    ],
+    weight_decay = 1e-4
+)
+
+scheduler = CosineAnnealingWarmRestarts( #this scheduler allows the net to find a more stable and flat minimum
+    optimizer = optimizer,
+    T_0 = 5, #5 epochs cycle 
+    T_mult = 2,
+    eta_min = 1e-6
+)
+
+criterion = BCEWithLogitsLoss( #numerically more stable than sigmoid + BCE
+    weight = get_pos_weights(train_data)
+)
+
+
+# training loop
+n_epochs = 3
+patience = 3 #early stopping hyperparameter
+best_auc = 0.0 #initializing checkpointing variable
+epochs_without_improvement = 0 #counting the plateau time
+
+for i in range(n_epochs):
+    train_loss = 0.0
+
+    for j, (images, labels) in enumerate(train_dl):
+        model.train()
+        print(j)
+
+        #calculating logits
+        logits = model(images)
+
+        #calculating batch loss
+        loss = criterion(logits, labels)
+        train_loss += loss.item()
+        
+        #performing the backpropagation
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    #calculate general avg loss for training dataset and validation dataset + auc_score on validation
+    train_loss /= len(train_dl)
+    val_loss, auc_score = validate(model, val_dl, criterion)
+
+    #printing results
+    print(f"Epoch {i}, step {j}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_avg_auc -> {auc_score}")
+
+    #checkpointing
+    if auc_score > best_auc:
+        epochs_without_improvement = 0
+
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "epoch": i,
+            "best_auc": auc_score
+            },
+            "checkpoints/best_model.pt"
+        )
+
+    else: #in case of plateau or decreasing metrics
+        epochs_without_improvement += 1
+
+        if epochs_without_improvement == patience: #early stopping
+            print("\n[Early stopping triggered]")
+            break
+
+    scheduler.step() #updating lr
+

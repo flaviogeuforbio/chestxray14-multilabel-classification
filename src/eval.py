@@ -1,0 +1,37 @@
+from sklearn.metrics import roc_auc_score 
+import torch
+
+@torch.no_grad
+def validate(model, val_dl, criterion):
+    model.eval()
+
+    loss = 0
+    all_probs = []
+    all_labels = []
+
+    for images, labels in val_dl:
+        print('ok')
+        logits = model(images)
+        
+        #calculating batch loss and updating running_loss
+        running_loss = criterion(logits, labels).item()
+        loss += running_loss
+
+        #calculating batch probability dist
+        probs = torch.softmax(logits, dim=1)
+
+        #updating arrays
+        all_probs.append(probs)
+        all_labels.append(labels)
+
+    all_probs = torch.cat(all_probs)
+    all_labels = torch.cat(all_labels)
+
+    auc_score = roc_auc_score(
+        all_labels.numpy(),
+        all_probs.numpy(),
+        average = "macro"
+    )
+
+    return loss / len(val_dl), auc_score
+        

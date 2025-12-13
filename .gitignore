@@ -1,0 +1,14 @@
+# --- Python cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual Envs and Dataset ---
+src/prova.py
+chestxray/
+
+# --- Ext. Images ---
+*webp
+*jpg
+*png
