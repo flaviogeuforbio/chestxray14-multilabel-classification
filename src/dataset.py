@@ -40,7 +40,7 @@ def create_split(list, val_size = 0.2, seed = 42, shuffle = True): #train/valida
 
     return train_list, val_list
 
-def create_image_map(data_root):
+def create_image_map(data_root): #creating image map for kaggle (original) dataset layout
     image_map = {}
 
     for folder in Path(data_root).glob("images_*"):
