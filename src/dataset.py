@@ -66,7 +66,7 @@ class ChestXRayDataset(Dataset):
 
         #removing non-existent entries
         available_images = set(self.image_map.keys())
-        self.df = self.df[self.df['Image Index'].isin(available_images)] #deleting rows corr. to images actually not in the dataset
+        df = df[df['Image Index'].isin(available_images)] #deleting rows corr. to images actually not in the dataset
 
         self.df = df.reset_index(drop=True)        
         
