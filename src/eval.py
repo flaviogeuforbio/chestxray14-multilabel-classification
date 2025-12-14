@@ -2,7 +2,7 @@ from sklearn.metrics import roc_auc_score
 import torch
 
 @torch.no_grad
-def validate(model, val_dl, criterion):
+def validate(model, val_dl, criterion, device):
     model.eval()
 
     loss = 0
@@ -10,6 +10,11 @@ def validate(model, val_dl, criterion):
     all_labels = []
 
     for images, labels in val_dl:
+        #moving data to device
+        images = images.to(device, non_blocking=True)
+        labels = labels.to(device, non_blocking=True)
+
+        #calculating logits
         logits = model(images)
         
         #calculating batch loss and updating running_loss

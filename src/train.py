@@ -11,6 +11,9 @@ import torch
 import os
 import argparse
 
+#Device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device:", device)
 
 #Data paths
 parser = argparse.ArgumentParser()
@@ -68,7 +71,7 @@ val_dl = DataLoader(val_data, batch_size = 64, shuffle = False)
 test_dl = DataLoader(test_data, batch_size = 64, shuffle = False)
 
 #creating model, optimizer, scheduler and defining loss
-model = ResNet50(num_classes = 14)
+model = ResNet50(num_classes = 14).to(device)
 optimizer = AdamW([
     {"params": model.classifier.parameters(), "lr": 1e-3}, #higher lr for head classifier
     {"params": model.backbone.layer4.parameters(), "lr": 1e-4} #lower lr for last convolutional block (fine-tuning)
@@ -99,7 +102,10 @@ for i in range(n_epochs):
 
     for j, (images, labels) in enumerate(train_dl):
         model.train()
-        print(j)
+        
+        #moving data to device
+        images = images.to(device, non_blocking=True)
+        labels = labels.to(device, non_blocking=True)
 
         #calculating logits
         logits = model(images)
@@ -115,7 +121,7 @@ for i in range(n_epochs):
 
     #calculate general avg loss for training dataset and validation dataset + auc_score on validation
     train_loss /= len(train_dl)
-    val_loss, auc_score = validate(model, val_dl, criterion)
+    val_loss, auc_score = validate(model, val_dl, criterion, device)
 
     #printing results
     print(f"Epoch {i}, step {j}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_auc -> {auc_score}")
