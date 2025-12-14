@@ -4,6 +4,7 @@ import os
 from PIL import Image
 import torch
 from sklearn.model_selection import train_test_split
+from pathlib import Path
 
 #Classes of the dataset
 CLASSES = [
@@ -23,13 +24,13 @@ CLASSES = [
     "Hernia"
 ]
 
-def extract_list(list_path: str):
+def extract_list(list_path: str): #extract List object from list file path
     with open(list_path) as f:
         list = f.read().splitlines()
 
     return list
 
-def create_split(list, val_size = 0.2, seed = 42, shuffle = True):
+def create_split(list, val_size = 0.2, seed = 42, shuffle = True): #train/validation list split
     train_list, val_list = train_test_split(
         list, 
         test_size = val_size,
@@ -39,9 +40,21 @@ def create_split(list, val_size = 0.2, seed = 42, shuffle = True):
 
     return train_list, val_list
 
+def create_image_map(data_root):
+    image_map = {}
+
+    for folder in Path(data_root).glob("images_*"):
+        if folder.is_dir():
+            for img in folder.glob("*.png"):
+                image_map[img.name] = str(img)
+
+    return image_map
+
+
 class ChestXRayDataset(Dataset):
-    def __init__(self, img_dir: str, csv_path: str, list_index: list, transform=None):        
-        self.img_dir = img_dir
+    def __init__(self, data_root: str, csv_path: str, list_index: list, transform=None):        
+        self.data_root = data_root
+        self.image_map = create_image_map(data_root)
         self.transform = transform #preprocessing pipeline
 
         #preparing pandas dataframe
@@ -58,8 +71,8 @@ class ChestXRayDataset(Dataset):
         row = self.df.iloc[idx] #extracting the df row
 
         #opening and preprocessing image
-        image = Image.open(os.path.join(self.img_dir, row['Image Index'])).convert("L") #just the luminosity channel (gray-scale)
-        image = image.convert("RGB") #ResNet wants 3 input channels
+        image_path = self.image_map[row['Image Index']]
+        image = Image.open(image_path).convert("RGB") #ResNet wants RGB inputs
 
         if self.transform:
             image = self.transform(image) #applying preprocessing pipeline

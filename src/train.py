@@ -47,21 +47,21 @@ train_list, val_list = create_split(train_val_list, val_size = 0.2)
 
 #Building datasets and dataloaders
 train_data = ChestXRayDataset(
-    img_dir = os.path.join(root_dir, "images"),
+    data_root = root_dir,
     csv_path = os.path.join(root_dir, csv_name),
     list_index = train_list,
     transform = train_transform()
 )
 
 val_data = ChestXRayDataset(
-    img_dir = os.path.join(root_dir, "images"),
+    data_root = root_dir,
     csv_path = os.path.join(root_dir, csv_name),
     list_index = val_list,
     transform = test_transform() 
 )
 
 test_data = ChestXRayDataset(
-    img_dir = os.path.join(root_dir, "images"),
+    data_root = root_dir,
     csv_path = os.path.join(root_dir, csv_name),
     list_index = test_list,
     transform = test_transform()
