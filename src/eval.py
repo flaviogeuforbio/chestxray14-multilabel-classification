@@ -10,7 +10,6 @@ def validate(model, val_dl, criterion):
     all_labels = []
 
     for images, labels in val_dl:
-        print('ok')
         logits = model(images)
         
         #calculating batch loss and updating running_loss
