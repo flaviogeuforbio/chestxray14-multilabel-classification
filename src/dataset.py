@@ -45,7 +45,9 @@ def create_image_map(data_root):
 
     for folder in Path(data_root).glob("images_*"):
         if folder.is_dir():
-            for img in folder.glob("*.png"):
+            images_subdir = folder / "images"
+
+            for img in images_subdir.glob("*.png"):
                 image_map[img.name] = str(img)
 
     return image_map
