@@ -139,7 +139,7 @@ for i in range(n_epochs):
     val_loss, auc_score = validate(model, val_dl, criterion, device)
 
     #printing results
-    print(f"Epoch {i}, step {j}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_auc -> {auc_score}")
+    print(f"Epoch {i}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_auc -> {auc_score}")
 
     #checkpointing
     if auc_score > best_auc:
