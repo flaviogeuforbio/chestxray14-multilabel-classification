@@ -33,7 +33,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 root_dir = args.data_root #getting main folder path by CLI 
-csv_name = "Data_Entry_2017_v2020.csv"
+csv_name = "Data_Entry_2017.csv"
 train_val_list_name = "train_val_list.txt"
 test_list_name = "test_list.txt"
 checkpoint_path = os.path.join(args.checkp_dir, "best_model.pt")
