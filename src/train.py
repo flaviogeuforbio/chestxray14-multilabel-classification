@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import torch
 import os
 import argparse
+from tqdm import tqdm
 
 #Device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -87,7 +88,7 @@ scheduler = CosineAnnealingWarmRestarts( #this scheduler allows the net to find 
 )
 
 criterion = BCEWithLogitsLoss( #numerically more stable than sigmoid + BCE
-    weight = get_pos_weights(train_data)
+    weight = get_pos_weights(train_data).to(device)
 )
 
 
@@ -100,7 +101,15 @@ epochs_without_improvement = 0 #counting the plateau time
 for i in range(n_epochs):
     train_loss = 0.0
 
-    for j, (images, labels) in enumerate(train_dl):
+    #progress bar
+    pbar = tqdm(
+        train_dl,
+        desc=f"Epoch [{i+1}/{n_epochs}]",
+        leave=False,         
+        dynamic_ncols=True
+    )
+
+    for images, labels in pbar:
         model.train()
         
         #moving data to device
@@ -118,6 +127,12 @@ for i in range(n_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
+        #update progress bar
+        pbar.set_postfix({
+            "loss": f"{loss.item():.4f}",
+            "lr": optimizer.param_groups[0]["lr"]
+        })
 
     #calculate general avg loss for training dataset and validation dataset + auc_score on validation
     train_loss /= len(train_dl)
