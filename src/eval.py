@@ -28,8 +28,8 @@ def validate(model, val_dl, criterion, device):
         all_probs.append(probs)
         all_labels.append(labels)
 
-    all_probs = torch.cat(all_probs)
-    all_labels = torch.cat(all_labels)
+    all_probs = torch.cat(all_probs).cpu()
+    all_labels = torch.cat(all_labels).cpu()
 
     auc_score = roc_auc_score(
         all_labels.numpy(),
