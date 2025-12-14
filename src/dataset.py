@@ -39,6 +39,7 @@ def create_split(list, val_size = 0.2, seed = 42, shuffle = True):
 
     return train_list, val_list
 
+
 class ChestXRayDataset(Dataset):
     def __init__(self, img_dir: str, csv_path: str, list_index: list, transform=None):        
         self.img_dir = img_dir

@@ -67,9 +67,9 @@ test_data = ChestXRayDataset(
     transform = test_transform()
 )
 
-train_dl = DataLoader(train_data, batch_size = 64, shuffle = True)
-val_dl = DataLoader(val_data, batch_size = 64, shuffle = False)
-test_dl = DataLoader(test_data, batch_size = 64, shuffle = False)
+train_dl = DataLoader(train_data, batch_size = 64, num_workers = 4, pin_memory = True, persistent_workers = True, shuffle = True)
+val_dl = DataLoader(val_data, batch_size = 64, num_workers = 4, pin_memory = True, persistent_workers = True, shuffle = False)
+test_dl = DataLoader(test_data, batch_size = 64, num_workers = 4, pin_memory = True, persistent_workers = True, shuffle = False)
 
 #creating model, optimizer, scheduler and defining loss
 model = ResNet50(num_classes = 14).to(device)
