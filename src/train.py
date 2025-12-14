@@ -14,11 +14,17 @@ import argparse
 
 #Data paths
 parser = argparse.ArgumentParser()
-parser.add_argument(
+parser.add_argument( #main folder path
     "--data_root",
     type = str,
     required = True,
     help = "Path to ChestXRay dataset folder"
+)
+parser.add_argument(
+    "--checkp_dir",
+    type = str,
+    required = True, 
+    help = "Path to Checkpoint models folder"
 )
 args = parser.parse_args()
 
@@ -26,6 +32,7 @@ root_dir = args.data_root #getting main folder path by CLI
 csv_name = "Data_Entry_2017_v2020.csv"
 train_val_list_name = "train_val_list.txt"
 test_list_name = "test_list.txt"
+checkpoint_path = os.path.join(args.checkp_dir, "best_model.pt")
 
 #Extracting idxs lists
 train_val_list = extract_list(os.path.join(root_dir, train_val_list_name))
@@ -111,7 +118,7 @@ for i in range(n_epochs):
     val_loss, auc_score = validate(model, val_dl, criterion)
 
     #printing results
-    print(f"Epoch {i}, step {j}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_avg_auc -> {auc_score}")
+    print(f"Epoch {i}, step {j}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_auc -> {auc_score}")
 
     #checkpointing
     if auc_score > best_auc:
@@ -123,7 +130,7 @@ for i in range(n_epochs):
             "epoch": i,
             "best_auc": auc_score
             },
-            "checkpoints/best_model.pt"
+            checkpoint_path
         )
 
     else: #in case of plateau or decreasing metrics
