@@ -16,19 +16,31 @@ from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
-#Data paths
+#parsing CLI options
 parser = argparse.ArgumentParser()
-parser.add_argument( #main folder path
+parser.add_argument( #dataset root folder path
     "--data_root",
     type = str,
     required = True,
     help = "Path to ChestXRay dataset folder"
 )
-parser.add_argument(
+parser.add_argument( #checkpoints folder path
     "--checkp_dir",
     type = str,
     required = True, 
     help = "Path to Checkpoint models folder"
+)
+parser.add_argument(
+    "--n_epochs",
+    type = int,
+    required = True,
+    help = "Number of training epochs"
+)
+parser.add_argument(
+    "--patience",
+    type = int, 
+    required = False,
+    help = "Early stopping parameter"
 )
 args = parser.parse_args()
 
@@ -93,8 +105,8 @@ criterion = BCEWithLogitsLoss( #numerically more stable than sigmoid + BCE
 
 
 # training loop
-n_epochs = 3
-patience = 3 #early stopping hyperparameter
+n_epochs = args.n_epochs #parsing from CLI
+patience = args.patience if args.patience is not None else 3 #early stopping hyperparameter
 best_auc = 0.0 #initializing checkpointing variable
 epochs_without_improvement = 0 #counting the plateau time
 
