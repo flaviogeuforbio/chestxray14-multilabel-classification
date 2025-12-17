@@ -127,7 +127,7 @@ if args.gradcam:
     target_class = torch.argmax(probs, dim = -1).item()
 
     #creating heatmap
-    gradcam = GradCAM(model, model.layer4)
+    gradcam = GradCAM(model, model.backbone.layer4)
     cam = gradcam.generate(image, target_class)
     cam = stretch_cam(cam)
 
