@@ -5,6 +5,7 @@ from preprocess import test_transform
 from PIL import Image
 import torch
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 #device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -121,7 +122,7 @@ print(class_probs)
 #GradCAM analysis
 if args.gradcam:
     #preprocessing image and finding target class (as most probable)
-    image = preprocess(image_path)
+    image = preprocess(args.image)
     target_class = torch.argmax(probs, dim = 1).item()
 
     #creating heatmap
@@ -137,6 +138,6 @@ if args.gradcam:
     plt.axis('off')
     plt.show()
 
-    plt.imshow(cam[0], transpose(1, 2, 0), cmap = 'jet', alpha = 0.5)
+    plt.imshow(cam[0].transpose(1, 2, 0), cmap = 'jet', alpha = 0.5)
     plt.axis('off')
     plt.show()

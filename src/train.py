@@ -166,6 +166,8 @@ for i in range(n_epochs):
             checkpoint_path
         )
 
+        best_auc = auc_score
+
     else: #in case of plateau or decreasing metrics
         epochs_without_improvement += 1
 
