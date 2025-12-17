@@ -23,7 +23,7 @@ def validate(model, val_dl, device, criterion = None, average = True):
             loss += running_loss
 
         #calculating batch probability dist
-        probs = torch.sigmoid(logits, dim=1)
+        probs = torch.sigmoid(logits)
 
         #updating arrays
         all_probs.append(probs)
