@@ -129,7 +129,7 @@ if args.gradcam:
     #creating heatmap
     gradcam = GradCAM(model, model.backbone.layer4)
     cam = gradcam.generate(image, target_class)
-    cam = stretch_cam(cam)
+    cam = stretch_cam(cam, image)
 
     #visualizing input image + heatmap
     cam = cam.cpu().detach().numpy()
