@@ -31,7 +31,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 data_root = args.data_root
-csv_name = "Data_Entry_2017.csv" #hand-coded because the code refers to Kaggle dataset structure
+csv_name = "Data_Entry_2017.csv" #hard-coded because the code refers to Kaggle dataset structure
 csv_path = os.path.join(data_root, csv_name)
 list_path = os.path.join(data_root, "test_list.txt")
 
@@ -49,7 +49,7 @@ test_dl = DataLoader(test_data, batch_size = 64, shuffle = False, num_workers = 
 
 #Loading the model
 model = ResNet50()
-model.load_state_dict(torch.load(args.checkpoint, map_location = device)['model'])
+model.load_state_dict(torch.load(args.checkpoint, map_location = device, weights_only = False)['model'])
 model = model.to(device)
 
 #Calculating and showing AUC scores 
