@@ -124,7 +124,7 @@ print(class_probs)
 if args.gradcam:
     #preprocessing image and finding target class (as most probable)
     image = preprocess(args.image)
-    target_class = torch.argmax(probs, dim = 1).item()
+    target_class = torch.argmax(probs, dim = -1).item()
 
     #creating heatmap
     gradcam = GradCAM(model, model.layer4)
