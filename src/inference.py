@@ -107,7 +107,7 @@ def stretch_cam(cam, input_tensor): #to stretch heatmap to input image dimension
 
 #defining model and preprocessing transform
 model = ResNet50()
-model.load_state_dict(torch.load(args.checkpoint)['model']).to(device)
+model.load_state_dict(torch.load(args.checkpoint, map_location = device)['model']).to(device)
 model.eval() #BN in eval mode
 transform = test_transform()
 
