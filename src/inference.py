@@ -137,7 +137,6 @@ if args.gradcam:
 
     plt.imshow(image[0].transpose(1, 2, 0))
     plt.axis('off')
-    plt.show()
 
     plt.imshow(cam[0].transpose(1, 2, 0), cmap = 'jet', alpha = 0.5)
     plt.axis('off')
