@@ -1,8 +1,8 @@
 from sklearn.metrics import roc_auc_score 
 import torch
 
-@torch.no_grad
-def validate(model, val_dl, criterion, device):
+@torch.no_grad()
+def validate(model, val_dl, device, criterion = None, average = True):
     model.eval()
 
     loss = 0
@@ -18,8 +18,9 @@ def validate(model, val_dl, criterion, device):
         logits = model(images)
         
         #calculating batch loss and updating running_loss
-        running_loss = criterion(logits, labels).item()
-        loss += running_loss
+        if criterion is not None:
+            running_loss = criterion(logits, labels).item()
+            loss += running_loss
 
         #calculating batch probability dist
         probs = torch.softmax(logits, dim=1)
@@ -31,11 +32,22 @@ def validate(model, val_dl, criterion, device):
     all_probs = torch.cat(all_probs).cpu()
     all_labels = torch.cat(all_labels).cpu()
 
-    auc_score = roc_auc_score(
-        all_labels.numpy(),
-        all_probs.numpy(),
-        average = "macro"
-    )
+    if average:
+        auc_score = roc_auc_score(
+            all_labels.numpy(),
+            all_probs.numpy(),
+            average = "macro"
+        )
+    else:
+        auc_score = roc_auc_score(
+            all_labels.numpy(),
+            all_probs.numpy(),
+            average = None
+        )
 
-    return loss / len(val_dl), auc_score
+    if criterion is not None:
+        return loss / len(val_dl), auc_score
+
+    else:
+        return auc_score
         
