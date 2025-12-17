@@ -45,7 +45,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 root_dir = args.data_root #getting main folder path by CLI 
-csv_name = "Data_Entry_2017.csv"
+csv_name = "Data_Entry_2017.csv" #hard-coded because the code refers to Kaggle dataset structure
 train_val_list_name = "train_val_list.txt"
 test_list_name = "test_list.txt"
 checkpoint_path = os.path.join(args.checkp_dir, "best_model.pt")

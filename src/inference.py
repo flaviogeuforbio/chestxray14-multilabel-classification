@@ -32,7 +32,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-def preprocess(image_path):
+def preprocess(image_path, transform, device):
     #open the image
     image = Image.open(image_path).convert("RGB")
 
@@ -47,7 +47,7 @@ def preprocess(image_path):
 @torch.no_grad()
 def get_probs(image_path: str, model: ResNet50, transform, device):
     #preprocessing image
-    image = preprocess(image_path)
+    image = preprocess(image_path, transform, device)
 
     #forward pass
     output = model(image)
@@ -123,7 +123,7 @@ print(class_probs)
 #GradCAM analysis
 if args.gradcam:
     #preprocessing image and finding target class (as most probable)
-    image = preprocess(args.image)
+    image = preprocess(args.image, transform, device)
     target_class = torch.argmax(probs, dim = -1).item()
 
     #creating heatmap
