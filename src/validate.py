@@ -38,15 +38,13 @@ csv_path = os.path.join(data_root, csv_name)
 list_path = os.path.join(data_root, "test_list.txt")
 
 
-class_to_idx = {c:i for i, c in enumerate(CLASSES)} #mapping class by its index ('Hernia': 13)
-
 
 @torch.no_grad()
-def get_class_dist(all_probs, all_labels):
+def get_class_dist(all_probs, all_labels, target_class):
 
     #extracting distribution for target class
-    all_class_probs = all_probs[:, class_to_idx[target_class]]
-    all_class_labels = all_labels[:, class_to_idx[target_class]]
+    all_class_probs = all_probs[:, target_class]
+    all_class_labels = all_labels[:, target_class]
 
     #getting output prob for positive & negative samples
     pos_samples = all_class_probs[all_class_labels == 1]
@@ -107,7 +105,7 @@ if args.per_class: #it shows AUC per each single class -> we can detect poorly m
 
     #plotting output prob distributions for target class
     target_class = np.argmax(auc_scores)
-    pos_samples, neg_samples = get_class_dist(all_probs, all_labels)
+    pos_samples, neg_samples = get_class_dist(all_probs, all_labels, target_class)
     plot_class_dist(pos_samples, neg_samples, out_path = f"dist_{CLASSES[target_class]}.png") 
 
 else:
