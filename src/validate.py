@@ -37,7 +37,7 @@ csv_name = "Data_Entry_2017.csv" #hard-coded because the code refers to Kaggle d
 csv_path = os.path.join(data_root, csv_name)
 list_path = os.path.join(data_root, "test_list.txt")
 
-
+# class_to_idx = {c:i for i, c in enumerate(CLASSES)} #map class name to idx ('Hernia': 13)
 
 @torch.no_grad()
 def get_class_dist(all_probs, all_labels, target_class):
@@ -70,8 +70,7 @@ def plot_class_dist(pos_samples, neg_samples, out_path: str):
         ax.yaxis.grid(True)
         ax.set_xticks([1, 2],
                     labels=['Pos', 'Neg'])
-        ax.set_xlabel('Output Prob. Distribution')
-        ax.set_ylabel('Observed values')
+        ax.set_ylabel('Prob. Distributions')
 
     #saving image
     fig.savefig(out_path, dpi=200, bbox_inches="tight")
@@ -104,9 +103,9 @@ if args.per_class: #it shows AUC per each single class -> we can detect poorly m
     print(class_scores)
 
     #plotting output prob distributions for target class
-    target_class = np.argmax(auc_scores)
-    pos_samples, neg_samples = get_class_dist(all_probs, all_labels, target_class)
-    plot_class_dist(pos_samples, neg_samples, out_path = f"dist_{CLASSES[target_class]}.png") 
+    for target_class in range(len(CLASSES)):
+        pos_samples, neg_samples = get_class_dist(all_probs, all_labels, target_class)
+        plot_class_dist(pos_samples, neg_samples, out_path = f"dist_{CLASSES[target_class]}.png") 
 
 else:
     _, _, auc_score = validate(model, test_dl, device, average = True) #average AUC over classes

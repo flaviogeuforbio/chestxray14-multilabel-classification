@@ -10,15 +10,7 @@ def validate(model, val_dl, device, criterion = None, average = True):
     all_probs = []
     all_labels = []
 
-    #progress bar
-    pbar = tqdm(
-        val_dl,
-        desc=f"Validation: ",
-        leave=False,         
-        dynamic_ncols=True
-    )
-
-    for i, (images, labels) in enumerate(val_dl):
+    for images, labels in tqdm(val_dl):
         #moving data to device
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
@@ -38,12 +30,7 @@ def validate(model, val_dl, device, criterion = None, average = True):
         all_probs.append(probs)
         all_labels.append(labels)
 
-        #update progress bar
-        if criterion is not None:
-            pbar.set_postfix({
-                "loss": f"{running_loss.item():.4f}",
-            })
-
+    #grouping together probs & labels, moving to cpu and converting to numpy (to apply sklearn roc_auc_score)
     all_probs = torch.cat(all_probs).cpu().numpy()
     all_labels = torch.cat(all_labels).cpu().numpy()
 
