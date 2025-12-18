@@ -62,12 +62,13 @@ def plot_class_dist(pos_samples, neg_samples, out_path: str):
     axs[0].set_title('Violin plot')
 
     #plot box plot
-    axs[1].boxplot([pos_samples, neg_samples])
+    axs[1].boxplot([pos_samples, neg_samples], showfliers = False)
     axs[1].set_title('Box plot')
 
     #adding horizontal grid lines
     for ax in axs:
         ax.yaxis.grid(True)
+        ax.set_yscale("symlog", linthresh = 1e-3) #logit scale opens up the distributions around 0
         ax.set_xticks([1, 2],
                     labels=['Pos', 'Neg'])
         ax.set_ylabel('Prob. Distributions')
