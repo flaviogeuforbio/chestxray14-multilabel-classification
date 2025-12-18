@@ -148,7 +148,7 @@ for i in range(n_epochs):
 
     #calculate general avg loss for training dataset and validation dataset + auc_score on validation
     train_loss /= len(train_dl)
-    val_loss, auc_score = validate(model, val_dl, device, criterion)
+    _, _, val_loss, auc_score = validate(model, val_dl, device, criterion)
 
     #printing results
     print(f"Epoch {i + 1}: train_loss -> {loss.item()}, validation_loss -> {val_loss}, validation_auc -> {auc_score}")
