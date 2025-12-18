@@ -1,5 +1,6 @@
 from sklearn.metrics import roc_auc_score 
 import torch
+from tqdm import tqdm 
 
 @torch.no_grad()
 def validate(model, val_dl, device, criterion = None, average = True):
@@ -9,7 +10,15 @@ def validate(model, val_dl, device, criterion = None, average = True):
     all_probs = []
     all_labels = []
 
-    for images, labels in val_dl:
+    #progress bar
+    pbar = tqdm(
+        val_dl,
+        desc=f"Validation: ",
+        leave=False,         
+        dynamic_ncols=True
+    )
+
+    for i, (images, labels) in enumerate(val_dl):
         #moving data to device
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
@@ -28,6 +37,12 @@ def validate(model, val_dl, device, criterion = None, average = True):
         #updating arrays
         all_probs.append(probs)
         all_labels.append(labels)
+
+        #update progress bar
+        if criterion is not None:
+            pbar.set_postfix({
+                "loss": f"{running_loss.item():.4f}",
+            })
 
     all_probs = torch.cat(all_probs).cpu().numpy()
     all_labels = torch.cat(all_labels).cpu().numpy()
