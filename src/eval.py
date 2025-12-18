@@ -29,25 +29,25 @@ def validate(model, val_dl, device, criterion = None, average = True):
         all_probs.append(probs)
         all_labels.append(labels)
 
-    all_probs = torch.cat(all_probs).cpu()
-    all_labels = torch.cat(all_labels).cpu()
+    all_probs = torch.cat(all_probs).cpu().numpy()
+    all_labels = torch.cat(all_labels).cpu().numpy()
 
     if average:
         auc_score = roc_auc_score(
-            all_labels.numpy(),
-            all_probs.numpy(),
+            all_labels,
+            all_probs,
             average = "macro"
         )
     else:
         auc_score = roc_auc_score(
-            all_labels.numpy(),
-            all_probs.numpy(),
+            all_labels,
+            all_probs,
             average = None
         )
 
     if criterion is not None:
-        return loss / len(val_dl), auc_score
+        return all_probs, all_labels, loss / len(val_dl), auc_score
 
     else:
-        return auc_score
+        return all_probs, all_labels, auc_score
         

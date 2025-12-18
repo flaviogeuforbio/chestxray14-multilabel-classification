@@ -42,23 +42,7 @@ class_to_idx = {c:i for i, c in enumerate(CLASSES)} #mapping class by its index 
 
 
 @torch.no_grad()
-def get_class_dist(model, test_dl, device, target_class: str):
-    all_probs = []
-    all_labels = []
-
-    #forward pass to get output probabilities of the model
-    for (images, labels) in test_dl:
-        images = images.to(device, non_blocking=True)
-        labels = labels.to(device, non_blocking=True)
-        output = model(images)
-        probs = torch.sigmoid(output) 
-
-        all_probs.append(probs)
-        all_labels.append(labels)
-
-    #collecting probs and labels for all the test set
-    all_probs = torch.cat(all_probs, dim = 0).cpu().numpy()
-    all_labels = torch.cat(all_labels, dim = 0).cpu().numpy()
+def get_class_dist(all_probs, all_labels):
 
     #extracting distribution for target class
     all_class_probs = all_probs[:, class_to_idx[target_class]]
@@ -71,7 +55,7 @@ def get_class_dist(model, test_dl, device, target_class: str):
     return pos_samples, neg_samples
 
 
-def plot_class_dist(pos_samples, neg_samples):
+def plot_class_dist(pos_samples, neg_samples, out_path: str):
     #plotting results
     fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
     axs[0].violinplot([pos_samples, neg_samples],
@@ -91,7 +75,10 @@ def plot_class_dist(pos_samples, neg_samples):
         ax.set_xlabel('Output Prob. Distribution')
         ax.set_ylabel('Observed values')
 
-    plt.show()
+    #saving image
+    fig.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved plot to: {out_path}")
 
 
 list_index = extract_list(list_path)
@@ -113,18 +100,18 @@ model = model.to(device)
 
 #Calculating and showing AUC scores 
 if args.per_class: #it shows AUC per each single class -> we can detect poorly managed classes
-    auc_scores = validate(model, test_dl, device, average = False)
+    all_probs, all_labels, auc_scores = validate(model, test_dl, device, average = False)
     class_scores = {c:s for (c,s) in zip(CLASSES, auc_scores)} #creating a readable dictionary {class: auc score}
 
     print(class_scores)
 
     #plotting output prob distributions for target class
     target_class = np.argmax(auc_scores)
-    pos_samples, neg_samples = get_class_dist(model, test_dl, device, CLASSES[target_class])
-    plot_class_dist(pos_samples, neg_samples) 
+    pos_samples, neg_samples = get_class_dist(all_probs, all_labels)
+    plot_class_dist(pos_samples, neg_samples, out_path = f"dist_{CLASSES[target_class]}.png") 
 
 else:
-    auc_score = validate(model, test_dl, device, average = True) #average AUC over classes
+    _, _, auc_score = validate(model, test_dl, device, average = True) #average AUC over classes
     
     print(auc_score)
 
