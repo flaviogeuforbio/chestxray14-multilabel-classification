@@ -113,7 +113,7 @@ def load_thresholds(thr_path: str): #to load thresholds json file
 
     return thresholds
 
-def rel_m(p, t, eps=1e-12): #relative margin (btw raw output prob. and thresholds)
+def calculate_rel_m(p, t, eps=1e-12): #relative margin (btw raw output prob. and thresholds)
     if p >= t:
         return (p - t) / max(1 - t, eps)
     else:
