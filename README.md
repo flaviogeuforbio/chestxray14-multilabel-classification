@@ -55,8 +55,10 @@ The project includes:
 
 Grad-CAM is used qualitatively, not as a localization ground truth.
 
+Score distribution for Atelectasis
 ![Score distribution for Atelectasis](prob_analysis/dist_Atelectasis.png)
 
+Grad-CAM heatmap for Infiltration
 ![Grad-CAM example for Infiltration](gradcam_analysis/gradcam_Infiltration.png)
 
 
