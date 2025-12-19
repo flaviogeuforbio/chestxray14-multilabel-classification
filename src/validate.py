@@ -29,7 +29,7 @@ parser.add_argument(
 parser.add_argument(
     "--per_class",
     action = "store_true",
-    help = "If True AUC score per class is returned, otherwise average AUC score"
+    help = "If True AUC score per class + output prob. visual analysis is returned, otherwise average AUC score"
 )
 args = parser.parse_args()
 data_root = args.data_root
@@ -55,7 +55,7 @@ def get_class_dist(all_probs, all_labels, target_class):
 
 def plot_class_dist(pos_samples, neg_samples, out_path: str):
     #plotting results
-    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(9, 4), sharey = True)
     axs[0].violinplot([pos_samples, neg_samples],
                     showmeans=False,
                     showmedians=True)
