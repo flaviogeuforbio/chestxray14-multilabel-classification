@@ -8,6 +8,7 @@ import argparse
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
 #Device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -104,9 +105,10 @@ if args.per_class: #it shows AUC per each single class -> we can detect poorly m
     print(class_scores)
 
     #plotting output prob distributions for target class
+    Path("./prob_analysis").mkdir(parents=True, exist_ok=True) #create class prob. analysis folder if non-existent
     for target_class in range(len(CLASSES)):
         pos_samples, neg_samples = get_class_dist(all_probs, all_labels, target_class)
-        plot_class_dist(pos_samples, neg_samples, out_path = f"dist_{CLASSES[target_class]}.png") 
+        plot_class_dist(pos_samples, neg_samples, out_path = f"prob_analysis/dist_{CLASSES[target_class]}.png") 
 
 else:
     _, _, auc_score = validate(model, test_dl, device, average = True) #average AUC over classes
