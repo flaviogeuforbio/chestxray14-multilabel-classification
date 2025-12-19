@@ -6,6 +6,7 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+import json
 
 #device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -104,6 +105,41 @@ def stretch_cam(cam, input_tensor): #to stretch heatmap to input image dimension
 
     return cam
 
+def load_thresholds(thr_path: str): #to load thresholds json file
+    with open(thr_path, "r") as f:
+        data = json.load(f)
+    
+    thresholds = data['thresholds']
+
+    return thresholds
+
+def rel_m(p, t, eps=1e-12): #relative margin (btw raw output prob. and thresholds)
+    if p >= t:
+        return (p - t) / max(1 - t, eps)
+    else:
+        return (p - t) / max(t, eps)
+
+def print_probs_preds(probs, thresholds): #to print inference results based on model output + calibrated thresholds
+    rel_margins = []
+
+    for i, cls in enumerate(CLASSES):
+        p = probs[i] #output prob for class i
+        t = thresholds[i] #calibrated threshold for class i
+        abs_m = p - t #absolute margin
+        pred = 'POS' if abs_m >= 0 else 'NEG'
+        rel_m = rel_m(p, t) #relative margin
+
+        rel_margins.append(rel_m)
+
+        print(f"{cls:18s} "
+          f"prob={p:5.3f} | "
+          f"thr={t:5.3f} | "
+          f"{pred:3s} | "
+          f"abs={abs_m:+6.3f} | "
+          f"rel={rel_m:+6.3f}")
+        
+    return rel_margins
+
 
 #defining model and preprocessing transform
 model = ResNet50()
@@ -114,15 +150,15 @@ transform = test_transform()
 
 #getting output probabilities
 probs = get_probs(args.image, model, transform, device)
-class_probs = {c:float(p.item()) for (c,p) in zip(CLASSES, probs)} #creating a readable dictionary {class: probability}
 
-#printing out results
-print(class_probs)
+#using thresholds (saved in json file after calibration) to predict classes and print results
+thresholds = load_thresholds("thresholds.json") #hard-coded for now
+rel_margins = print_probs_preds(probs, thresholds) #collects relative margins too for GradCAM analysis if needed
 
 
-#GradCAM analysis
+#GradCAM analysis (working progress: add compatibility with thresholds)
 if args.gradcam:
-    #preprocessing image and finding target class (as most probable)
+    #preprocessing image and finding target classese (as most probable)
     image = preprocess(args.image, transform, device)
     target_class = torch.argmax(probs, dim = -1).item()
 
