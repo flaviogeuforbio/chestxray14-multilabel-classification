@@ -124,7 +124,7 @@ def print_probs_preds(probs, thresholds): #to print inference results based on m
 
     for i, cls in enumerate(CLASSES):
         p = probs[i] #output prob for class i
-        t = thresholds[i] #calibrated threshold for class i
+        t = thresholds[CLASSES[i]] #calibrated threshold for class i
         abs_m = p - t #absolute margin
         pred = 'POS' if abs_m >= 0 else 'NEG'
         rel_m = rel_m(p, t) #relative margin
