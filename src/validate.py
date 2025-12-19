@@ -105,7 +105,7 @@ if args.per_class: #it shows AUC per each single class -> we can detect poorly m
     print(class_scores)
 
     #plotting output prob distributions for target class
-    Path("./prob_analysis").mkdir(parents=True, exist_ok=True) #create class prob. analysis folder if non-existent
+    Path("../prob_analysis").mkdir(parents=True, exist_ok=True) #create class prob. analysis folder if non-existent
     for target_class in range(len(CLASSES)):
         pos_samples, neg_samples = get_class_dist(all_probs, all_labels, target_class)
         plot_class_dist(pos_samples, neg_samples, out_path = f"prob_analysis/dist_{CLASSES[target_class]}.png") 

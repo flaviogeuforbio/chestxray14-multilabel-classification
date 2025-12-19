@@ -186,7 +186,7 @@ if args.gradcam:
     # target_class = torch.argmax(probs, dim = -1).item()
     target_classes = get_target_classes(rel_margins)
 
-    Path("./gradcam_analysis").mkdir(parents=True, exist_ok=True) #create GradCAM heatmaps folder if non-existent
+    Path("../gradcam_analysis").mkdir(parents=True, exist_ok=True) #create GradCAM heatmaps folder if non-existent
 
     #creating heatmaps
     gradcam = GradCAM(model, model.backbone.layer4)
