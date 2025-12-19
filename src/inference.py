@@ -7,6 +7,11 @@ import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import json
+import numpy as np
+from pathlib import Path
+
+import warnings
+warnings.filterwarnings("ignore")
 
 #device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -140,6 +145,24 @@ def print_probs_preds(probs, thresholds): #to print inference results based on m
         
     return rel_margins
 
+def get_target_classes(rel_margins: list, default_n = 1): #to get target classes for GradCAM analysis
+    rel_margins = np.array(rel_margins)
+
+    #case all predicted negatives
+    if np.all(rel_margins < 0):
+        idx = list(np.argsort(rel_margins))
+
+        return idx[-default_n:]
+    
+    #case some POS prediction
+    else:
+        idxs = []
+        for i, m in enumerate(rel_margins):
+            if m >= 0:
+                idxs.append(i)
+
+        return idxs
+
 
 #defining model and preprocessing transform
 model = ResNet50()
@@ -158,22 +181,32 @@ rel_margins = print_probs_preds(probs, thresholds) #collects relative margins to
 
 #GradCAM analysis (working progress: add compatibility with thresholds)
 if args.gradcam:
-    #preprocessing image and finding target classese (as most probable)
+    #preprocessing image and finding target classes (based on decision margins)
     image = preprocess(args.image, transform, device)
-    target_class = torch.argmax(probs, dim = -1).item()
+    # target_class = torch.argmax(probs, dim = -1).item()
+    target_classes = get_target_classes(rel_margins)
 
-    #creating heatmap
+    Path("./gradcam_analysis").mkdir(parents=True, exist_ok=True) #create GradCAM heatmaps folder if non-existent
+
+    #creating heatmaps
     gradcam = GradCAM(model, model.backbone.layer4)
-    cam = gradcam.generate(image, target_class)
-    cam = stretch_cam(cam, image)
+    image_toplot = image.cpu().detach().numpy()
 
-    #visualizing input image + heatmap
-    cam = cam.cpu().detach().numpy()
-    image = image.cpu().detach().numpy()
+    for cls in target_classes:
+        cam = gradcam.generate(image, cls)
+        cam = stretch_cam(cam, image)
 
-    plt.imshow(image[0].transpose(1, 2, 0))
-    plt.axis('off')
+        #visualizing & saving input image + heatmap
+        cam = cam.cpu().detach().numpy()
 
-    plt.imshow(cam[0].transpose(1, 2, 0), cmap = 'jet', alpha = 0.5)
-    plt.axis('off')
-    plt.show()
+        #create a new figure for each class
+        plt.figure(figsize=(6, 6))
+        plt.title(f"{CLASSES[cls]}")
+        plt.imshow(image_toplot[0].transpose(1, 2, 0))
+        plt.imshow(cam[0, 0], cmap = 'jet', alpha = 0.5)
+        plt.axis('off')
+
+        out_path = f"gradcam_analysis/gradcam_{CLASSES[cls]}.png"
+        plt.savefig(fname = out_path, dpi = 200, bbox_inches = "tight")
+        plt.close()
+        print(f"Saved at {out_path}")
