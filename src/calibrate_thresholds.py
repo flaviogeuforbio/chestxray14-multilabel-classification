@@ -106,9 +106,11 @@ def dict_stats(best_stats, classes: list):
 def print_save_calibration(best_thresholds, best_stats, out_path: str, method = "F1 maximization", split = "validation"):
     #printing results
     print(f"Best tresholds according to F1 score: {best_thresholds}")
-    print(f"F1 scores: {best_stats[:][0]}")
-    print(f"Precision scores: {best_stats[:][1]}")
-    print(f"Recall score: {best_stats[:][2]}") 
+
+    best_stats = np.array(best_stats)
+    print(f"F1 scores: {best_stats[:, 0]}")
+    print(f"Precision scores: {best_stats[:, 1]}")
+    print(f"Recall score: {best_stats[:, 2]}") 
 
     #saving json file with thresholds
     data = {
