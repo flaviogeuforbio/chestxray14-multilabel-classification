@@ -47,7 +47,7 @@ val_dl = DataLoader(val_data, batch_size = 64, num_workers = 4, pin_memory = Tru
 
 #importing best saved model
 model = ResNet50()
-model.load_state_dict(torch.load(args.checkpoint, map_location = device)['model'])
+model.load_state_dict(torch.load(args.checkpoint, map_location = device, weights_only = False)['model'])
 model = model.to(device)
 
 
