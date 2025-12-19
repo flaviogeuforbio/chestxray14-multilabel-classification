@@ -50,10 +50,16 @@ Thresholds and metrics are saved in a structured JSON artifact.
 
 The project includes:
 
-- **Per-class score distribution analysis** (positives vs negatives) with box plots & violin plots
-- **Grad-CAM heatmaps** computed per class, selected according to calibrated decision margins
+- **Per-class score distribution analysis** (positives vs negatives) with box plots & violin plots (using ```validate.py```)
+- **Grad-CAM heatmaps** computed per class, selected according to calibrated decision margins (using ```inference.py```)
 
 Grad-CAM is used qualitatively, not as a localization ground truth.
+
+![Score distribution for Atelectasis](prob_analysis/dist_Atelectasis.png)
+
+![Grad-CAM example for Infiltration](gradcam_analysis/gradcam_Infiltration.png)
+
+
 ## Results
 
 The following table shows the calculated metrics (ROC-AUC/F1/PR) and best estimated threshold for 6 choosen classes (2 common, 2 intermediate, 2 rare):
@@ -138,12 +144,13 @@ Thresholds and metrics saved in ```thresholds.json```.
 
 ### Inference + GradCAM
 
+```bash
 python inference.py \
   --image <IMAGE_PATH> \
   --checkpoint <PATH> \
   --thresholds thresholds.json \
   --gradcam (optional)
-
+```
 It needs ```thresholds.json``` previously created with ```calibrate_thresholds.py```.
 
 - image: Path to image to use for Inference
