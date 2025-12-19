@@ -54,6 +54,14 @@ The project includes:
 - **Grad-CAM heatmaps** computed per class, selected according to calibrated decision margins
 
 Grad-CAM is used qualitatively, not as a localization ground truth.
+
+Score distribution for Atelectasis
+![Score distribution for Atelectasis](prob_analysis/dist_Atelectasis.png)
+
+Grad-CAM heatmap for Infiltration
+![Grad-CAM example for Infiltration](gradcam_analysis/gradcam_Infiltration.png)
+
+
 ## Results
 
 The following table shows the calculated metrics (ROC-AUC/F1/PR) and best estimated threshold for 6 choosen classes (2 common, 2 intermediate, 2 rare):
