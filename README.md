@@ -25,8 +25,8 @@ The project focuses not only on ranking performance (ROC-AUC), but also on **dec
 - Primary metric: **mean ROC-AUC** over 14 classes
 - Achieved: **~0.72–0.73** on validation set (more detailed results below)  
 
-#### Why ROC-AUC is not reliable for imbalanced data
-ROC-AUC measures ranking (how often positives are scored above negatives) and does not guarantee calibrated probabilities or clean separation for a single threshold—especially under strong class imbalance and label noise.
+#### Why ROC-AUC is not fully informative
+ROC-AUC measures ranking (how often positives are scored above negatives) and does not guarantee calibrated probabilities or clean separation for a single threshold, especially under strong class imbalance and label noise.
 
 #### Threshold calibration
 Raw probabilities are typically low and not directly usable with a fixed standard 0.5 threshold.
