@@ -18,7 +18,7 @@ print(f"Using device: {device}")
 #parsing from CLI data root folder
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "data_root",
+    "--data_root",
     type = str,
     required = True,
     help = "Path to main dataset folder"
